@@ -5,7 +5,10 @@
           <div class="col-3" v-for="(pokemon, index) in pokemonList" :key="index">
             <PokemonCard :data="pokemon" />
           </div>
-          <div class="col-3"><button class="load_more" @click="loadMore">Load More</button></div>
+      </div>
+      <div class="navigation">
+        <button class="previous" :disabled="!previousUrl" @click="previous">Previous</button>
+        <button class="next" :disabled="!nextUrl" @click="next">Next</button>
       </div>
     </div>    
   </main>
@@ -30,23 +33,27 @@ export default {
   data(){
     return {
       pokemonList: [],
-      offset: 0,
-      limit: 50
+      previousUrl: null,
+      nextUrl: null
     }
   },
   created(){
-    this.getPokemonListOffset()
+    this.getPokemonListOffset('https://pokeapi.co/api/v2/pokemon?offset=0&limit=30')
   },
   methods:{
-    loadMore(){
-      this.offset += 15
-      this.getPokemonListOffset()
+    previous(){
+      this.pokemonList = []
+      this.getPokemonListOffset(this.previousUrl)
     },
-    getPokemonListOffset(){
-      console.log(this.offset, this.limit)
+    next(){
+      this.getPokemonListOffset(this.nextUrl)
+    },
+    getPokemonListOffset(url){
       const self = this
-      axios.get(`https://pokeapi.co/api/v2/pokemon?offset=${this.offset}&limit=${this.limit}`).then(result => {
+      axios.get(url).then(result => {
         console.log(result)
+        self.previousUrl = result.data.previous
+        self.nextUrl = result.data.next
         let list = result.data.results
         list.map(p=>{
           axios.get(p.url).then(pokemon => {
@@ -85,23 +92,39 @@ export default {
     width: calc(25% - 10px);
     flex-basis: calc(25% - 20px);
   }
-  .load_more{
+  .navigation{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 20px;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    position: sticky;
+    bottom: 20px;
+  }
+  .previous,.next{
     border: none;
-    border: 1px solid #F2F2F2;
-    border-radius: 10px;
-    background: transparent;
-    box-shadow: 0px 10px 20px 0px #f1f1f1;
+    /* border: 1px solid #F2F2F2; */
+    border-radius: 6px;
+    background: rgb(243, 220, 9);
+    box-shadow: 0px 10px 20px 0px #afafaf;
     padding: 10px;
     cursor: pointer;
-    width: 100%;
-    min-height: 182px;
-    height: 100%;
+    width: 48%;
+    min-height: 50px;
     position: relative;
+    font-size: 18px;
   }
-  .load_more:hover{
-    background: rgba(0,0,0,.02);
+  .previous:not([disabled]):hover,.next:hover{
+    /* background: rgba(0,0,0,.02); */
+    opacity: .9;
   }
-  .load_more:active{
-    background: rgba(0,0,0,.05);
+  .previous:not([disabled]):active,.next:active{
+    /* background: rgba(0,0,0,.05); */
+    opacity: .8;
+  }
+  .previous{
+    background: rgb(228, 228, 228);
   }
 </style>
