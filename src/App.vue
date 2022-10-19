@@ -1,28 +1,30 @@
 <template>
   <header class="flex">
-    <img
-      alt="logo"
-      class="logo"
-      src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png"
-      height="100"
-    />
-
+    <img alt="logo" class="logo" src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png" height="100" />
     <div class="wrapper">
       <Intro msg="The RESTful Pokémon API" />
-
       <nav>
         <RouterLink to="/">Navigation type 1</RouterLink>
         <RouterLink to="/type2">Navigation type 2</RouterLink>
       </nav>
     </div>
   </header>
-
   <RouterView />
 </template>
 
-<script setup>
+<script>
 import { RouterLink, RouterView } from "vue-router";
 import Intro from "./components/Intro.vue";
+export default{
+  components: {
+    Intro,
+    RouterLink,
+    RouterView
+  },
+  data(){
+    return{}
+  }
+}
 </script>
 
 <style scoped>
@@ -32,7 +34,11 @@ header {
   position: sticky;
   top: 0px;
 }
-
+@media screen and (max-width: 768px) {
+  header {
+    position: relative;
+  }
+}
 .logo {
   display: block;
   margin: 0 auto 2rem;

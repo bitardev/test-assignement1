@@ -1,14 +1,3 @@
-<script>
-  export default{
-    props:['data'],
-    data(){
-      return{
-
-      }
-    }
-  }
-</script>
-
 <template>
   <div class="pokemon">
     <img :src="data.image" alt="">
@@ -19,6 +8,17 @@
     </div>
   </div>
 </template>
+
+<script>
+  export default{
+    props:['data'],
+    data(){
+      return{
+
+      }
+    }
+  }
+</script>
 
 <style scoped>
 .pokemon{

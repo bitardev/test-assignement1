@@ -2,29 +2,21 @@
   <main>
     <div class="container">
       <div class="row">
-          <div class="col-3" v-for="(pokemon, index) in pokemonList" :key="index">
+          <div class="col-3" v-for="(pokemon, index) in $store.state.pokemonList" :key="index">
             <PokemonCard :data="pokemon" />
           </div>
       </div>
       <div class="navigation">
-        <button class="previous" :disabled="!previousUrl" @click="previous">Previous</button>
-        <button class="next" :disabled="!nextUrl" @click="next">Next</button>
+        <button class="previous" :disabled="!$store.state.previousUrl" @click="previous">Previous</button>
+        <button class="next" :disabled="!$store.state.nextUrl" @click="next">Next</button>
       </div>
     </div>    
   </main>
 </template>
 
 <script>
-/* 
-1) The end-user is able to navigate through a list of the first 150 Pokemons.
-2) For each Pokémon, display the following: name, image, height and weight.
-3) At first load do not display more than 50 Pokemons.
-4) The editor should be able to choose between two types of navigation:
-  1. By having a load more button which load the next 15 Pokemons.
-  2. By having a pagination (30 Pokemons maximum per page).
-Use this API: https://pokeapi.co/ */
+
 import PokemonCard from "../components/PokemonCard.vue";
-import axios from 'axios'
 
 export default {
   components: {
@@ -32,46 +24,23 @@ export default {
   },
   data(){
     return {
-      pokemonList: [],
-      previousUrl: null,
-      nextUrl: null
     }
   },
   created(){
-    this.getPokemonListOffset('https://pokeapi.co/api/v2/pokemon?offset=0&limit=30')
+    if(this.$store.state.pokemonList.length === 0){
+      this.$store.dispatch('getPokemonListOffset','https://pokeapi.co/api/v2/pokemon?offset=0&limit=30')
+    }
   },
   methods:{
     previous(){
-      this.pokemonList = []
-      this.getPokemonListOffset(this.previousUrl)
+      if(this.$store.state.pokemonList.length > 50){
+        this.$store.commit('remove30PokemonFromTheList')
+      }
+      this.$store.dispatch('getPokemonListOffset',this.$store.state.previousUrl)
     },
     next(){
-      this.getPokemonListOffset(this.nextUrl)
+      this.$store.dispatch('getPokemonListOffset',this.$store.state.nextUrl)
     },
-    getPokemonListOffset(url){
-      const self = this
-      axios.get(url).then(result => {
-        console.log(result)
-        self.previousUrl = result.data.previous
-        self.nextUrl = result.data.next
-        let list = result.data.results
-        list.map(p=>{
-          axios.get(p.url).then(pokemon => {
-            // console.log(pokemon.data)
-            if(!self.pokemonList.find((pk) => pk.name === p.name)){
-              self.pokemonList.push({
-                name: p.name,
-                url: p.url,
-                height: pokemon.data.height,
-                weight: pokemon.data.weight,
-                image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + pokemon.data.id + '.png'
-              })
-            }
-          })
-        })
-        // console.log(result.data);
-      })
-    }
   }
 }
 
@@ -126,5 +95,11 @@ export default {
   }
   .previous{
     background: rgb(228, 228, 228);
+  }
+  @media screen and (max-width: 768px) {
+    .container .row .col-3{
+      width: calc(50% - 10px);
+      flex-basis: calc(50% - 20px);
+    }
   }
 </style>

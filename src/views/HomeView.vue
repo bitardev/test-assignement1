@@ -2,7 +2,7 @@
   <main>
     <div class="container">
       <div class="row">
-          <div class="col-3" v-for="(pokemon, index) in pokemonList" :key="index">
+          <div class="col-3" v-for="(pokemon, index) in $store.state.pokemonList" :key="index">
             <PokemonCard :data="pokemon" />
           </div>
           <div class="col-3"><button class="load_more" @click="loadMore">Load More</button></div>
@@ -12,16 +12,8 @@
 </template>
 
 <script>
-/* 
-1) The end-user is able to navigate through a list of the first 150 Pokemons.
-2) For each Pokémon, display the following: name, image, height and weight.
-3) At first load do not display more than 50 Pokemons.
-4) The editor should be able to choose between two types of navigation:
-  1. By having a load more button which load the next 15 Pokemons.
-  2. By having a pagination (30 Pokemons maximum per page).
-Use this API: https://pokeapi.co/ */
+
 import PokemonCard from "../components/PokemonCard.vue";
-import axios from 'axios'
 
 export default {
   components: {
@@ -29,41 +21,23 @@ export default {
   },
   data(){
     return {
-      pokemonList: [],
       offset: 0,
       limit: 50
     }
   },
+  computed: {
+  },
   created(){
-    this.getPokemonListOffset()
+    if(this.$store.state.pokemonList.length === 0){
+      this.$store.dispatch('getPokemonListOffset',`https://pokeapi.co/api/v2/pokemon?offset=${this.offset}&limit=${this.limit}`)
+    }
+  },
+  mounted(){
   },
   methods:{
     loadMore(){
       this.offset += 15
-      this.getPokemonListOffset()
-    },
-    getPokemonListOffset(){
-      console.log(this.offset, this.limit)
-      const self = this
-      axios.get(`https://pokeapi.co/api/v2/pokemon?offset=${this.offset}&limit=${this.limit}`).then(result => {
-        console.log(result)
-        let list = result.data.results
-        list.map(p=>{
-          axios.get(p.url).then(pokemon => {
-            // console.log(pokemon.data)
-            if(!self.pokemonList.find((pk) => pk.name === p.name)){
-              self.pokemonList.push({
-                name: p.name,
-                url: p.url,
-                height: pokemon.data.height,
-                weight: pokemon.data.weight,
-                image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + pokemon.data.id + '.png'
-              })
-            }
-          })
-        })
-        // console.log(result.data);
-      })
+      this.$store.dispatch('getPokemonListOffset',`https://pokeapi.co/api/v2/pokemon?offset=${this.offset}&limit=${this.limit}`)
     }
   }
 }
@@ -103,5 +77,11 @@ export default {
   }
   .load_more:active{
     background: rgba(0,0,0,.05);
+  }
+  @media screen and (max-width: 768px) {
+    .container .row .col-3{
+      width: calc(50% - 10px);
+      flex-basis: calc(50% - 20px);
+    }
   }
 </style>
